@@ -1,0 +1,18 @@
+@use "sass:meta";
+
+// Import lib and others using @use instead of meta.load-css (for variables and mixins access)
+@use "scss/lib" as lib;
+@use "scss/bar" as bar;
+@use "scss/control_center" as control_center;
+@use "scss/osd" as osd;
+@use "scss/notification_popup" as notification_popup;
+@use "scss/launcher" as launcher;
+@use "scss/settings" as settings;
+@use "scss/powermenu" as powermenu;
+@use "scss/notification_center" as notification_center;
+@use "scss/window_preview" as window_preview;
+
+* {
+    font-family: JetBrainsMono;
+    font-weight: bold;
+  }

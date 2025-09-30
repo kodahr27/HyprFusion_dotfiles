@@ -1,0 +1,207 @@
+@use "sass:color";
+@use "_user_colors" as *;
+@use "mixins/hover" as hover;
+
+.bar-widget {
+    padding: 0.4rem 1rem;
+    margin: 0;
+    border-radius: 0;
+    transition: 0.3s;
+    background-color: rgba($surface, 0.3);
+}
+
+.clock {
+    @include hover.hover($surface);
+    color: $onSurface;
+    background-color: $surface;
+    font-size: 1.5rem;
+    border-radius: 1rem;
+    padding: 0 0.75rem;
+    margin: 0 0.5rem;
+    margin-right: 0;
+    transition: 0.3s;
+
+    &.active {
+        background-color: $primary;
+        color: $surface;
+
+        .record-indicator {
+            color: $surface;
+        }
+
+        @include hover.hover($primary);
+    }
+}
+
+.kb-layout {
+    border-radius: 0.5rem;
+    padding: 0 0.25rem;
+    margin: 0 0.25rem;
+    transition: 0.3s;
+    font-size: 1.3rem;
+}
+
+.kb-layout:hover {
+    background-color: rgba(white, 0.2);
+}
+
+.tray {
+    padding: 0 0.25rem;
+    margin: 0 0.25rem;
+}
+
+.workspaces {
+    border-radius: 1rem;
+    padding: 0.5rem;
+    background-color: $surface;
+    margin: 0 0.5rem;
+    margin-left: 0;
+}
+
+.workspace {
+    @include hover.hover($primaryContainer);
+    border-radius: 1rem;
+    margin: 0 0.25rem;
+    min-width: 0.7rem;
+    min-height: 0.7rem;
+    transition: 0.3s;
+
+    &.active {
+        @include hover.hover($primary);
+        min-width: 2rem;
+    }
+}
+
+@keyframes recorder-animation {
+    0% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+.record-indicator {
+    color: $error;
+}
+
+.record-indicator.active {
+    animation: recorder-animation 2s infinite;
+}
+
+.battery-item {
+    margin: 0 0.25rem;
+}
+
+.battery-scale {
+    min-width: 5rem;
+    all: unset;
+
+    * {
+        all: unset;
+    }
+}
+
+.battery-scale trough,
+.battery-scale trough highlight {
+    background: $surface;
+    border-radius: 1rem;
+    min-height: 1.3rem;
+    min-width: 5rem;
+}
+
+.battery-scale trough highlight {
+    background: $primary;
+}
+
+.battery-icon {
+    color: $onSurface;
+    margin-right: 0.3rem;
+}
+
+/* Base pinned app style */
+.taskbar-pinned-apps {
+  border-radius: 6px;
+  border: 1px solid transparent;
+  padding-left: 6px;
+  padding-right: 6px;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    transform 150ms ease;
+}
+
+.taskbar-pinned-apps:hover {
+  background-color: color.adjust(#6d6d6d59, $lightness: 5%);
+}
+
+/* Styling for dragging app icon */
+.taskbar-pinned-apps.dragging {
+  opacity: 0.6;
+  transform: scale(0.9);
+}
+
+/* Highlight app when dragging another pinned app over it */
+.taskbar-pinned-apps.drag-hover {
+  background-color: rgba(0, 120, 215, 0.25);
+  border: 2px solid rgba(0, 120, 215, 0.8);
+}
+
+.taskbar-count-badge {
+    background-color: $primary;
+    color: black;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: bold;
+    min-width: 16px;
+    min-height: 16px;
+    padding: 0px 0px;
+    margin-top: 10px;
+}
+
+/* Anchor drop target: thin vertical bar between icons */
+.drop-anchor {
+  min-width: 6px;
+  margin: 0 0;
+  background-color: transparent;
+  border-radius: 40%;
+  transition: background-color 150ms ease;
+}
+
+/* Anchor highlight on drag hover */
+.drop-anchor.drag-hover {
+  background-color: $primary;
+}
+
+#drag-icon-label {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid white;
+}
+
+.running-apps-group {
+  border-radius: 6px;
+  border: 1px solid transparent;
+  padding-left: 6px;
+  padding-right: 6px;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    transform 150ms ease;
+}
+
+.running-apps-group:hover {
+  background-color: color.adjust(#6d6d6d59, $lightness: 5%);
+}

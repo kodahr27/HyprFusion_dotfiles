@@ -1,0 +1,16 @@
+@use "_user_colors" as *;
+@use "mixins/hover" as hover;
+@use "mixins/window";
+
+.notification-popup {
+    @include window.window;
+    min-width: 25rem;
+
+    & .notification-close {
+        @include hover.hover($surface);
+    }
+
+    & .notification-action {
+        @include hover.hover($surfaceContainer);
+    }
+}

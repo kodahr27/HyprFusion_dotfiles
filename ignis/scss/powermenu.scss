@@ -1,0 +1,33 @@
+@use "mixins/hover" as hover;
+@use "mixins/window";
+@use "_user_colors" as *;
+
+.powermenu {
+    @include window.window;
+    border-radius: 5rem;
+}
+
+.powermenu-button {
+    @include hover.hover($surfaceContainer);
+    transition: 0.3s;
+    border-radius: 4rem;
+    min-width: 16rem;
+    min-height: 12rem;
+
+    &:focus {
+        @include hover.hover($primary);
+        color: $surface;
+    }
+}
+
+.powermenu-button-label {
+    margin-top: 0.7rem;
+}
+
+.powermenu-button-box {
+    margin: 3rem;
+}
+
+.powermenu-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+}

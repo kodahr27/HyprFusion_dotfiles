@@ -1,0 +1,236 @@
+@use "_user_colors" as *;
+@use "sass:color";
+/* Main launcher window */
+.launcher {
+  margin-top: 4rem;
+  min-width: 320px;
+  min-height: 800px;
+  border-radius: 24px;
+  background-color: $surfaceContainer;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+  padding: 1rem 1.25rem;
+}
+
+/* Search box container */
+.launcher-search-box {
+  padding: 0.85rem 0.6rem;
+  background-color: $surface;
+  border-radius: 20px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+  margin-bottom: 0.65rem;
+}
+
+.launcher-search-box:focus-within {
+  box-shadow: 0 4px 10px rgba($primary, 0.18);
+  border-color: rgba($primary, 0.28);
+}
+
+/* Search input */
+.launcher-search {
+  all: unset;
+  padding: 0.5rem 0.75rem;
+  font-size: 1.05rem;
+  font-family: 'Inter', 'Cantarell', 'Segoe UI', system-ui, sans-serif;
+  font-weight: 400;
+  color: $onSurface;
+  background: transparent;
+}
+
+/* Content area */
+.launcher-content {
+  border-radius: 16px;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}
+
+/* Category tabs container */
+.launcher-category-tabs {
+  padding: 0;
+  margin-bottom: 0.25rem;
+}
+
+/* Category buttons */
+.launcher-category-button {
+  padding: 0.4rem 0.55rem;
+  background-color: $surfaceVariant;
+  color: $onSurfaceVariant;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  font-size: 0.68rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-right: 0.35rem;
+}
+
+.launcher-category-button:hover {
+  background-color: $primary;
+  color: $onPrimary;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 9px rgba($primary, 0.22);
+  border-color: rgba($primary, 0.2);
+}
+
+.launcher-category-button:active,
+.launcher-category-button.active {
+  background-color: $primary;
+  color: $onPrimary;
+  box-shadow: 0 5px 14px rgba($primary, 0.35);
+  border-color: color.adjust($primary, $lightness: -10%);
+}
+
+/* Apps container backgrounds */
+.launcher .launcher-category-tabs,
+.launcher-content,
+.launcher-content scrolledwindow {
+  background: transparent;
+  border-radius: 16px;
+}
+
+/* Individual app items */
+.launcher-app {
+  all: unset;
+  padding: 0.8rem 1rem;
+  background-color: $surface;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  min-width: 110px;
+  min-height: 95px;
+  transition: all 0.22s ease;
+  margin: 0.25rem 0.3rem;
+}
+
+.launcher-app:hover,
+.launcher-app:focus {
+  background-color: color.adjust($surface, $lightness: 3%);
+  border-color: rgba($primary, 0.3);
+  transform: translateY(-2.7px) scale(1.015);
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.11);
+}
+
+.launcher-app:active {
+  transform: translateY(-1px) scale(0.985);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+}
+
+/* App labels */
+.launcher-app-label {
+  font-size: 0.9rem;
+  font-family: 'Inter', 'Cantarell', 'Segoe UI', system-ui, sans-serif;
+  font-weight: 500;
+  color: $onSurface;
+  line-height: 1.3;
+  margin-top: 0.45rem;
+  opacity: 0.9;
+  transition: opacity 0.2s ease;
+}
+
+.launcher-app:hover .launcher-app-label {
+  opacity: 1;
+  color: $onSurface;
+}
+
+/* App icons */
+.launcher-app .icon,
+.launcher-app .widgets-Icon {
+  border-radius: 16px;
+  box-shadow: 0 1.8px 6.5px rgba(0, 0, 0, 0.09);
+  transition: all 0.24s ease;
+  margin-bottom: 0.38rem;
+}
+
+.launcher-app:hover .icon,
+.launcher-app:hover .widgets-Icon {
+  box-shadow: 0 3px 13px rgba(0, 0, 0, 0.14);
+  transform: scale(1.045);
+}
+
+/* Web search button */
+.launcher-web-search {
+  margin-top: 1.8rem;
+  margin-bottom: 1.8rem;
+  background-color: $primaryContainer;
+  border-color: rgba($primary, 0.2);
+}
+
+.launcher-web-search:hover {
+  background-color: color.adjust($primaryContainer, $lightness: 4%);
+  transform: translateY(-1.8px) scale(1.018);
+}
+
+.launcher-web-search .launcher-app-label {
+  color: $onPrimaryContainer;
+  font-weight: 600;
+}
+
+/* Smaller screen adjustments */
+.launcher-small {
+  margin-top: 1.5rem;
+  min-width: 320px;
+  padding: 0.75rem 0.85rem;
+}
+
+.launcher-small .launcher-search-box {
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 0.55rem;
+}
+
+.launcher-small .launcher-app {
+  min-width: 90px;
+  min-height: 80px;
+  padding: 0.6rem 0.8rem;
+  margin: 0.2rem 0.25rem;
+}
+
+.launcher-small .launcher-app-label {
+  font-size: 0.84rem;
+}
+
+.launcher-small .launcher-category-button {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+  margin-right: 0.25rem;
+}
+
+/* Dark mode adjustments */
+.launcher-dark {
+  background-color: rgba($surfaceContainer, 0.92);
+}
+
+.launcher-dark .launcher-search-box {
+  background-color: rgba($surface, 0.75);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.launcher-dark .launcher-app {
+  background-color: rgba($surface, 0.55);
+  border-color: rgba(255, 255, 255, 0.065);
+}
+
+.launcher-dark .launcher-app:hover {
+  background-color: rgba(color.adjust($surface, $lightness: 4%), 0.76);
+}
+
+/* Animation smoothness kept unchanged */
+
+/* Scrollbar lighter for all sizes */
+scrollbar {
+  background: transparent;
+}
+
+scrollbar slider {
+  background-color: rgba($onSurface, 0.18);
+  border-radius: 6px;
+  min-width: 6px;
+  min-height: 6px;
+}
+
+scrollbar slider:hover {
+  background-color: rgba($onSurface, 0.28);
+}
+
+scrollbar slider:active {
+  background-color: rgba($primary, 0.48);
+}

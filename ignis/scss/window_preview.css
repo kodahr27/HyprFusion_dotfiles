@@ -1,0 +1,98 @@
+/* Window Preview Popover Styles */
+.window-preview-popover {
+    background: rgba(30, 30, 30, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.window-preview-popover > contents {
+    padding: 0;
+    background: transparent;
+}
+
+/* Window Preview Header */
+.window-preview-header {
+    font-size: 12px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 8px;
+    opacity: 0.9;
+}
+
+/* Individual Window Preview */
+.window-preview {
+    background: rgba(40, 40, 40, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.window-preview:hover {
+    background: rgba(50, 50, 50, 0.9);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Window Preview Image */
+.window-preview-image {
+    border-radius: 4px;
+    background: #2a2a2a;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Window Preview Title */
+.window-preview-title {
+    font-size: 11px;
+    color: #ffffff;
+    padding: 4px 8px;
+    opacity: 0.85;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 0 0 6px 6px;
+}
+
+/* Fallback Preview Text */
+.window-preview-fallback {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Running Apps Group Hover State */
+.running-apps-group:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transition: background 0.2s ease;
+}
+
+/* Animation for popover appearance */
+@keyframes preview-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.window-preview-popover {
+    animation: preview-fade-in 0.2s ease-out;
+}
+
+/* Grid spacing for multiple previews */
+.window-preview-popover grid {
+    margin: 0;
+}
+
+/* Ensure proper sizing for preview containers */
+.window-preview box {
+    min-width: 200px;
+    min-height: 150px;
+}
+
+/* Hover effects for taskbar icons when preview is shown */
+.running-apps-group.preview-active {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+}
