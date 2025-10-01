@@ -4,7 +4,6 @@ import threading
 import time
 import subprocess
 import tempfile
-import json
 from typing import Any, Callable, Dict, List, Optional
 
 from gi.repository import Gtk, GdkPixbuf, GLib, Gdk
@@ -18,7 +17,7 @@ class WindowPreviewWidget(widgets.Box):
     PREVIEW_WIDTH = 250
     PREVIEW_HEIGHT = 170
     TITLE_HEIGHT = 30
-    REFRESH_INTERVAL_MS = 300  # throttle capture interval
+    REFRESH_INTERVAL_MS = 50  # throttle capture interval
 
     def __init__(self, window: Any, on_click: Optional[Callable] = None):
         super().__init__(orientation="vertical", spacing=4, css_classes=["window-preview"])
@@ -79,38 +78,7 @@ class WindowPreviewWidget(widgets.Box):
                 tmp_path = tmp.name
 
             try:
-                # Try grim-hyprland
                 if subprocess.run(["grim", "-w", clean_address, tmp_path],
-                                  capture_output=True, text=True, timeout=2).returncode == 0:
-                    return GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                        tmp_path, self.PREVIEW_WIDTH, self.PREVIEW_HEIGHT, False
-                    )
-
-                # Fallback: hyprctl + grim
-                result = subprocess.run(["hyprctl", "-j", "clients"],
-                                        capture_output=True, text=True, timeout=1)
-                if result.returncode == 0:
-                    clients = json.loads(result.stdout)
-                    target_window = next(
-                        (c for c in clients if str(c.get("address", "")) == clean_address or
-                         str(c.get("address", "")).replace("0x", "") == clean_address.replace("0x", "")),
-                        None
-                    )
-                    if target_window:
-                        at = target_window.get("at", [0, 0])
-                        size = target_window.get("size", [100, 100])
-                        geometry = f"{at[0]},{at[1]} {size[0]}x{size[1]}"
-                        if subprocess.run(["grim", "-g", geometry, tmp_path],
-                                          capture_output=True, text=True, timeout=2).returncode == 0:
-                            return GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                                tmp_path, self.PREVIEW_WIDTH, self.PREVIEW_HEIGHT, False
-                            )
-
-                # Fallback: focus window + grimblast
-                hyprland = HyprlandService.get_default()
-                hyprland.dispatch("focuswindow", f"address:{clean_address}")
-                time.sleep(0.05)
-                if subprocess.run(["grimblast", "save", "active", tmp_path],
                                   capture_output=True, text=True, timeout=2).returncode == 0:
                     return GdkPixbuf.Pixbuf.new_from_file_at_scale(
                         tmp_path, self.PREVIEW_WIDTH, self.PREVIEW_HEIGHT, False
