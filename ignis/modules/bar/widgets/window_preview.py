@@ -16,8 +16,7 @@ logger = logging.getLogger(__name__)
 class WindowPreviewWidget(widgets.Box):
     PREVIEW_WIDTH = 250
     PREVIEW_HEIGHT = 170
-    TITLE_HEIGHT = 30
-    REFRESH_INTERVAL_MS = 50  # throttle capture interval
+    REFRESH_INTERVAL_MS = 100  # throttle capture interval (ms)
 
     def __init__(self, window: Any, on_click: Optional[Callable] = None):
         super().__init__(orientation="vertical", spacing=4, css_classes=["window-preview"])
@@ -52,9 +51,13 @@ class WindowPreviewWidget(widgets.Box):
                     self._last_pixbuf = pixbuf
                     GLib.idle_add(self._update_texture, pixbuf)
                 elif self._last_pixbuf:
+                    # Reuse last successful capture
                     GLib.idle_add(self._update_texture, self._last_pixbuf)
                 else:
-                    GLib.idle_add(self._set_fallback_preview)
+                    # Show fallback only once
+                    if not hasattr(self, '_fallback_shown'):
+                        GLib.idle_add(self._set_fallback_preview)
+                        self._fallback_shown = True
             except Exception as e:
                 logger.debug(f"Preview update failed: {e}")
             time.sleep(self.REFRESH_INTERVAL_MS / 1000.0)
@@ -67,27 +70,35 @@ class WindowPreviewWidget(widgets.Box):
             logger.debug(f"Failed to update texture: {e}")
 
     def _capture_window_thumbnail(self) -> Optional[GdkPixbuf.Pixbuf]:
+        window_address = getattr(self._window, "address", None)
+        if not window_address:
+            return None
+
+        clean_address = window_address if str(window_address).startswith("0x") else f"0x{window_address}"
+
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+            tmp_path = tmp.name
+
         try:
-            window_address = getattr(self._window, "address", None)
-            if not window_address:
-                return None
-
-            clean_address = window_address if str(window_address).startswith("0x") else f"0x{window_address}"
-
-            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-                tmp_path = tmp.name
-
-            try:
-                if subprocess.run(["grim", "-w", clean_address, tmp_path],
-                                  capture_output=True, text=True, timeout=2).returncode == 0:
-                    return GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                        tmp_path, self.PREVIEW_WIDTH, self.PREVIEW_HEIGHT, False
-                    )
-            finally:
-                if os.path.exists(tmp_path):
-                    os.unlink(tmp_path)
+            result = subprocess.run(
+                ["grim", "-w", clean_address, tmp_path],
+                capture_output=True,
+                text=True,
+                timeout=2
+            )
+            
+            if result.returncode == 0 and os.path.exists(tmp_path):
+                return GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                    tmp_path, self.PREVIEW_WIDTH, self.PREVIEW_HEIGHT, False
+                )
+        except subprocess.TimeoutExpired:
+            logger.debug(f"Screenshot capture timed out for {clean_address}")
         except Exception as e:
             logger.debug(f"Screenshot capture failed: {e}")
+        finally:
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+        
         return None
 
     def _set_fallback_preview(self):
