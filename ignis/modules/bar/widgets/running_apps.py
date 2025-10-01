@@ -134,12 +134,12 @@ class RunningAppGroup(widgets.Button):
 
     def _on_hover_enter(self, controller=None, x=None, y=None):
         self._is_hovering = True
-        if self._badge_info.windows:
+        if self._badge_info.windows and not self._menu.is_visible():
             _preview_manager.cancel_scheduled_hide(self._app.id)
             GLib.idle_add(self._schedule_preview_show)
 
     def _schedule_preview_show(self) -> bool:
-        if self._is_hovering and self._badge_info.windows:
+        if self._is_hovering and self._badge_info.windows and not self._menu.is_visible():
             root_widget = self.get_root()
             if root_widget:
                 x, y = self._calculate_preview_position()
