@@ -1,11 +1,11 @@
 from gi.repository import Gtk, GLib
 from ignis import widgets
 from ignis.services.applications import ApplicationsService, Application
-from ignis.menu_model import IgnisMenuModel, IgnisMenuItem, IgnisMenuSeparator
+from ignis.menu_model import IgnisMenuModel
 
 from .window_detector import get_window_detector, WindowState
 from .badge_counter import get_badge_counter, BadgeInfo
-from .app_launcher import AppLauncher
+from .taskbar_utils import TaskbarUtils
 from .window_preview import get_preview_manager
 
 applications = ApplicationsService.get_default()
@@ -33,33 +33,8 @@ class RunningAppGroup(widgets.Button):
             )
             self._icon_box.append(self._badge_widget)
 
-        # Menu
-        menu_items = [
-            IgnisMenuItem(
-                label="Focus All" if badge_info.count > 1 else "Focus",
-                on_activate=lambda x: GLib.idle_add(self._focus_windows)
-            ),
-            IgnisMenuSeparator(),
-            IgnisMenuItem(
-                label="New Window",
-                on_activate=lambda x: GLib.idle_add(AppLauncher.launch_app, app)
-            ),
-            IgnisMenuSeparator(),
-            IgnisMenuItem(
-                label="Pin" if not app.is_pinned else "Unpin",
-                on_activate=lambda x: GLib.idle_add(self._toggle_pin),
-            ),
-        ]
-        if app.actions:
-            menu_items.append(IgnisMenuSeparator())
-            for action in app.actions[:3]:
-                menu_items.append(
-                    IgnisMenuItem(
-                        label=action.name,
-                        on_activate=lambda x, action=action: GLib.idle_add(AppLauncher.launch_app_action, action),
-                    )
-                )
-        self._menu = widgets.PopoverMenu(model=IgnisMenuModel(*menu_items))
+        # Menu - will be rebuilt dynamically
+        self._menu = widgets.PopoverMenu(model=self._build_menu())
 
         content_box = widgets.Box()
         content_box.append(self._icon_box)
@@ -84,6 +59,16 @@ class RunningAppGroup(widgets.Button):
 
         self.set_has_tooltip(False)
 
+    def _build_menu(self) -> IgnisMenuModel:
+        """Build the context menu using TaskbarUtils utility"""
+        return TaskbarUtils.build_app_context_menu(
+            app=self._app,
+            window_count=self._badge_info.count,
+            windows=self._badge_info.windows,
+            on_focus_callback=self._focus_windows,
+            on_close_callback=self._close_all_windows
+        )
+
     def update_badge_info(self, new_badge_info: BadgeInfo):
         self._badge_info = new_badge_info
 
@@ -101,6 +86,10 @@ class RunningAppGroup(widgets.Button):
             else:
                 if self._badge_widget:
                     self._badge_widget.set_visible(False)
+            
+            # Rebuild menu with updated badge info
+            self._menu.set_model(self._build_menu())
+        
         GLib.idle_add(update_widget)
 
     def _toggle_pin(self):
@@ -110,7 +99,11 @@ class RunningAppGroup(widgets.Button):
             self._app.pin()
 
     def _focus_windows(self):
-        AppLauncher.focus_or_launch(self._app, self._badge_info.windows)
+        TaskbarUtils.focus_or_launch(self._app, self._badge_info.windows)
+
+    def _close_all_windows(self):
+        """Close all windows associated with this app"""
+        TaskbarUtils.close_windows(self._badge_info.windows)
 
     def _calculate_preview_position(self):
         root = self.get_root()

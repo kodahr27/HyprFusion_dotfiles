@@ -6,11 +6,10 @@ from gi.repository import GLib, Gtk, Gdk, Gio
 from ignis import widgets
 from ignis.window_manager import WindowManager
 from ignis.services.applications import ApplicationsService, Application
-from ignis.menu_model import IgnisMenuModel, IgnisMenuItem, IgnisMenuSeparator
 
 from .window_detector import get_window_detector, WindowState
 from .badge_counter import get_badge_counter, BadgeInfo
-from .app_launcher import AppLauncher
+from .taskbar_utils import TaskbarUtils
 from .window_preview import get_preview_manager
 
 logger = logging.getLogger(__name__)
@@ -104,7 +103,8 @@ class PinnedAppGroup(widgets.Button, DragDropMixin):
         self._count_label = widgets.Label(css_classes=["taskbar-count-badge"], visible=False)
         self._icon_box.append(self._count_label)
 
-        self._menu = self._create_menu()
+        # Create menu without model initially - will be set when badge info is available
+        self._menu = widgets.PopoverMenu()
         main_box = widgets.Box()
         main_box.append(self._icon_box)
         main_box.append(self._menu)
@@ -112,21 +112,35 @@ class PinnedAppGroup(widgets.Button, DragDropMixin):
         self.child = main_box
         self.css_classes = ["taskbar-pinned-apps", "unset"]
 
-    def _create_menu(self) -> widgets.PopoverMenu:
-        menu_items = [
-            IgnisMenuItem(label="Launch", on_activate=lambda x: AppLauncher.launch_app_delayed(self._app)),
-            IgnisMenuSeparator(),
-            IgnisMenuItem(label="Unpin", on_activate=lambda x: self._unpin_app()),
-        ]
-        for action in self._app.actions:
-            menu_items.append(
-                IgnisMenuItem(label=action.name, on_activate=lambda x, action=action: AppLauncher.launch_app_action(action))
-            )
-        return widgets.PopoverMenu(model=IgnisMenuModel(*menu_items))
+    def _build_menu_model(self):
+        """Build context menu model using TaskbarUtils utility"""
+        windows = self._current_badge_info.windows if self._current_badge_info else []
+        window_count = self._current_badge_info.count if self._current_badge_info else 0
+        
+        return TaskbarUtils.build_app_context_menu(
+            app=self._app,
+            window_count=window_count,
+            windows=windows,
+            on_focus_callback=self._focus_windows,
+            on_close_callback=self._close_windows,
+            show_launch=False
+        )
+
+    def _focus_windows(self):
+        """Focus windows if they exist, otherwise launch the app"""
+        if self._current_badge_info and self._current_badge_info.windows:
+            TaskbarUtils.focus_or_launch(self._app, self._current_badge_info.windows)
+        else:
+            TaskbarUtils.launch_app(self._app)
+
+    def _close_windows(self):
+        """Close all windows associated with this app"""
+        if self._current_badge_info and self._current_badge_info.windows:
+            TaskbarUtils.close_windows(self._current_badge_info.windows)
 
     def _setup_event_handlers(self) -> None:
         self.on_click = self._handle_click
-        self.on_right_click = lambda x: self._menu.popup()
+        self.on_right_click = lambda x: self._show_menu()
 
     def _setup_hover_events(self) -> None:
         main_box = self.child
@@ -156,7 +170,24 @@ class PinnedAppGroup(widgets.Button, DragDropMixin):
             else:
                 self._count_label.set_label("")
                 self._count_label.set_visible(False)
+        
         GLib.idle_add(_update)
+
+    def _show_menu(self):
+        """Show context menu, building it on-demand with current badge info"""
+        windows = self._current_badge_info.windows if self._current_badge_info else []
+        window_count = self._current_badge_info.count if self._current_badge_info else 0
+        
+        menu_model = TaskbarUtils.build_app_context_menu(
+            app=self._app,
+            window_count=window_count,
+            windows=windows,
+            on_focus_callback=self._focus_windows,
+            on_close_callback=self._close_windows,
+            show_launch=False
+        )
+        self._menu.set_model(menu_model)
+        self._menu.popup()
 
     def _unpin_app(self) -> None:
         try:
@@ -251,9 +282,9 @@ class PinnedAppGroup(widgets.Button, DragDropMixin):
         self._click_timeout = None
         if not self._is_dragging:
             if self._current_badge_info and self._current_badge_info.windows:
-                GLib.idle_add(AppLauncher.focus_or_launch, self._app, self._current_badge_info.windows)
+                GLib.idle_add(TaskbarUtils.focus_or_launch, self._app, self._current_badge_info.windows)
             else:
-                GLib.idle_add(AppLauncher.launch_app, self._app)
+                GLib.idle_add(TaskbarUtils.launch_app, self._app)
         return False
 
     def _cancel_click_timeout(self) -> None:
