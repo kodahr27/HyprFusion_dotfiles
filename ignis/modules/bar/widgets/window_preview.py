@@ -76,29 +76,27 @@ class WindowPreviewWidget(widgets.Box):
 
         clean_address = window_address if str(window_address).startswith("0x") else f"0x{window_address}"
 
-        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-            tmp_path = tmp.name
-
         try:
+            # Output to stdout using '-'
             result = subprocess.run(
-                ["grim", "-w", clean_address, tmp_path],
+                ["grim", "-w", clean_address, "-"],
                 capture_output=True,
-                text=True,
                 timeout=2
             )
-            
-            if result.returncode == 0 and os.path.exists(tmp_path):
-                return GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                    tmp_path, self.PREVIEW_WIDTH, self.PREVIEW_HEIGHT, False
-                )
+            if result.returncode == 0 and result.stdout:
+                loader = GdkPixbuf.PixbufLoader()
+                loader.write(result.stdout)
+                loader.close()
+                pixbuf = loader.get_pixbuf()
+                if pixbuf:
+                    # Optionally scale the pixbuf for preview
+                    return pixbuf.scale_simple(
+                        self.PREVIEW_WIDTH, self.PREVIEW_HEIGHT, GdkPixbuf.InterpType.BILINEAR
+                    )
         except subprocess.TimeoutExpired:
             logger.debug(f"Screenshot capture timed out for {clean_address}")
         except Exception as e:
             logger.debug(f"Screenshot capture failed: {e}")
-        finally:
-            if os.path.exists(tmp_path):
-                os.unlink(tmp_path)
-        
         return None
 
     def _set_fallback_preview(self):
