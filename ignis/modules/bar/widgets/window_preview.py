@@ -119,7 +119,9 @@ class WindowPreviewWidget(widgets.Box):
 class WindowPreviewPopover(widgets.Window):
     MAX_COLUMNS = 3
     SPACING = 8
-    PADDING = 12
+    PADDING = 6
+    PREVIEW_WIDTH = 250
+    PREVIEW_HEIGHT = 170
 
     def __init__(self, windows: List[Any], app_name: str, app_id: str):
         super().__init__(
@@ -135,7 +137,7 @@ class WindowPreviewPopover(widgets.Window):
         self._preview_widgets: List[WindowPreviewWidget] = []
         
         self._setup_content()
-        self.set_size_request(250, 180)
+        self.set_size_request(self.PREVIEW_WIDTH, self.PREVIEW_HEIGHT)
         self.visible = False
 
     def _setup_content(self):
