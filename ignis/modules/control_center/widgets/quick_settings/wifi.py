@@ -17,9 +17,7 @@ class WifiNetworkItem(widgets.Button):
             child=widgets.Box(
                 child=[
                     widgets.Icon(
-                        image=access_point.bind(
-                            "strength", transform=lambda value: access_point.icon_name
-                        ),
+                        image=access_point.bind("icon_name"),
                     ),
                     widgets.Label(
                         label=access_point.ssid,
@@ -34,6 +32,25 @@ class WifiNetworkItem(widgets.Button):
                 ]
             ),
         )
+
+
+def deduplicate_access_points(access_points: list[WifiAccessPoint]) -> list[WifiAccessPoint]:
+    """Keep only the strongest signal for each SSID."""
+    seen_ssids = {}
+    
+    for ap in access_points:
+        if not ap.ssid:  # Skip empty SSIDs
+            continue
+            
+        if ap.ssid not in seen_ssids:
+            seen_ssids[ap.ssid] = ap
+        else:
+            # Keep the one with stronger signal
+            if ap.strength > seen_ssids[ap.ssid].strength:
+                seen_ssids[ap.ssid] = ap
+    
+    # Sort by signal strength (strongest first)
+    return sorted(seen_ssids.values(), key=lambda ap: ap.strength, reverse=True)
 
 
 class WifiMenu(Menu):
@@ -51,7 +68,9 @@ class WifiMenu(Menu):
                     vertical=True,
                     child=device.bind(
                         "access_points",
-                        transform=lambda value: [WifiNetworkItem(i) for i in value if i.ssid ],
+                        transform=lambda value: [
+                            WifiNetworkItem(i) for i in deduplicate_access_points(value)
+                        ],
                     ),
                 ),
                 widgets.Separator(),
